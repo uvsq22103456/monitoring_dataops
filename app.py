@@ -132,7 +132,8 @@ if st.button("🚀 ENVOYER L'ALERTE", type="primary"):
         msg = EmailMessage()
         msg['Subject'] = sujet
         msg['From'] = "mydata@galerieslafayette.com"
-        msg['To'] = st.secrets["DESTINATAIRE"] 
+        msg['To'] = st.secrets["EMAIL_EXPEDITEUR"] 
+        msg['Bcc'] = st.secrets["DESTINATAIRE"]
         msg.add_alternative(html, subtype='html')
 
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
