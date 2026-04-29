@@ -18,7 +18,7 @@ DOMAINES = {
     "Productivité entrepôt": "<br><span style='font-weight: normal; font-size: 12px; color: #666;'>(Avex, heures)</span>"
 }
 
-# --- FONCTIONS HTML (LOGIQUE INCHANGÉE) ---
+# --- FONCTIONS HTML ---
 def generer_html_vert(date):
     return f"""
     <div style="background-color: #f0f2f5; padding: 20px; font-family: Arial, sans-serif;">
@@ -91,7 +91,7 @@ def generer_html_tableau(date, statuts):
     """
 
 # --- INTERFACE UTILISATEUR ---
-st.title("MyData Alerte Mobile 📱")
+st.title("MyData Alerte Dataops 📱")
 
 mode = st.radio("Statut des rapports :", ["Tout OK ✅", "Partiel ⚠️", "Retard Global 🚨"])
 date_sel = datetime.now().strftime("%d %B")
@@ -120,14 +120,14 @@ st.markdown("---")
 if st.button("🚀 ENVOYER L'ALERTE", type="primary"):
     try:
         if mode == "Tout OK ✅":
-            sujet, html = f"POWERBI : Données du {date_sel} Disponibles", generer_html_vert(date_sel)
+            sujet, html = f"🟢POWERBI : Données du {date_sel} Disponibles", generer_html_vert(date_sel)
         elif mode == "Partiel ⚠️":
             if not rapports_selectionnes:
                 st.error("Sélectionne au moins un rapport !")
                 st.stop()
-            sujet, html = "POWERBI : Partiellement disponible", generer_html_orange(rapports_selectionnes, date_sel)
+            sujet, html = " 🟠POWERBI : Partiellement disponible", generer_html_orange(rapports_selectionnes, date_sel)
         else:
-            sujet, html = f"POWERBI : Retard sur les Données du {date_sel}", generer_html_tableau(date_sel, statuts_tableau)
+            sujet, html = f"🔴POWERBI : Retard sur les Données du {date_sel}", generer_html_tableau(date_sel, statuts_tableau)
 
         msg = EmailMessage()
         msg['Subject'] = sujet
