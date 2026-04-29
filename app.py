@@ -7,7 +7,7 @@ from datetime import datetime
 st.set_page_config(page_title="MyData Monitoring", page_icon="📊")
 
 # logo
-URL_LOGO = "https://github.com/uvsq22103456/monitoring_dataops/blob/main/logo.png?raw=true"
+URL_LOGO = "https://raw.githubusercontent.com/uvsq22103456/monitoring_dataops/main/logo.png"
 
 # Dictionnaire des domaines avec leurs sous-titres
 DOMAINES = {
