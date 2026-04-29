@@ -6,8 +6,8 @@ from datetime import datetime
 # --- CONFIGURATION DE LA PAGE ---
 st.set_page_config(page_title="MyData Monitoring", page_icon="📊")
 
-# 📌 ETAPE FINALE : Remplace le texte ci-dessous par ton lien GitHub (clic droit sur l'image > Copier l'adresse de l'image)
-URL_LOGO = "METS_TON_LIEN_ICI"
+# logo
+URL_LOGO = "https://github.com/uvsq22103456/monitoring_dataops/blob/main/logo.png?raw=true"
 
 # Dictionnaire des domaines avec leurs sous-titres
 DOMAINES = {
