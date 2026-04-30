@@ -86,10 +86,10 @@ def generer_html_orange(rapports, date):
     return f"""
     <div style="background-color: #f0f2f5; padding: 20px; font-family: Arial, sans-serif;">
         <div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
-            <h2 style="margin: 0; color: #000;"><img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | Données du {date} partiel</h2>
+            <h2 style="margin: 0; color: #000;"><img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | Données du {date} partiellement disponibles</h2>
         </div>
         <div style="background-color: white; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0; border-left: 5px solid #FF9800;">
-            <p style="font-weight: bold;">⚠️ Suite à des retards, les données sont indisponibles pour :</p>
+            <p style="font-weight: bold;">⚠️ Suite à des retards de traitements, les données sont indisponibles pour les rapports suivants :</p>
             <ul>{liste}</ul>
             <p>L'ensemble des autres rapports est intégralement disponible.</p>
         </div>
