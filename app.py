@@ -8,7 +8,7 @@ st.set_page_config(page_title="MyData Monitoring", page_icon="📊")
 
 URL_LOGO = "https://raw.githubusercontent.com/uvsq22103456/monitoring_dataops/main/logo.png"
 
-# Tes textes d'origine conservés à 100%
+# Tes textes d'origine à 100%
 DOMAINES = {
     "Vente": "",
     "Stock": "<br><span style='font-weight: normal; font-size: 12px; color: #666;'>(stock, ral, mouvement, rupture)</span>",
@@ -28,29 +28,28 @@ mois_fr = {
 }
 date_str = f"{date_choisie.strftime('%d')} {mois_fr[date_choisie.strftime('%B')]}"
 
-# --- FONCTION TABLEAU (DESIGN PASTILLES) ---
+# --- FONCTION TABLEAU (ÉPURÉE SANS FOND) ---
 def generer_html_tableau(date, statuts, titre, texte_alerte=None):
     lignes_html = ""
     for domaine, sous_titre in DOMAINES.items():
-        # Style Power BI
         is_pbi_ok = "disponible" in statuts[domaine]["PBI"]
-        style_pbi = "background-color: #E8F5E9; color: #2E7D32; border-radius: 4px; padding: 4px 8px;" if is_pbi_ok else "background-color: #FFF3E0; color: #E65100; border-radius: 4px; padding: 4px 8px;"
+        couleur_pbi = "#2E7D32" if is_pbi_ok else "#E65100"
         
-        # Style Décisionnel
         is_deci_ok = "disponible" in statuts[domaine]["Deci"]
-        style_deci = "background-color: #E8F5E9; color: #2E7D32; border-radius: 4px; padding: 4px 8px;" if is_deci_ok else "background-color: #FFF3E0; color: #E65100; border-radius: 4px; padding: 4px 8px;"
+        couleur_deci = "#2E7D32" if is_deci_ok else "#E65100"
         
-        # Bordure de ligne
         bordure_gauche = "5px solid #4CAF50" if (is_pbi_ok and is_deci_ok) else "5px solid #FF9800"
 
         lignes_html += f"""
         <tr>
-            <td style="padding: 12px; border: 1px solid #e0e0e0; font-weight: bold; border-left: {bordure_gauche};">{domaine} {sous_titre}</td>
-            <td style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">
-                <span style="{style_pbi}">{statuts[domaine]['PBI']}</span>
+            <td style="padding: 12px; border: 1px solid #e0e0e0; font-weight: bold; border-left: {bordure_gauche}; text-align: left;">
+                {domaine} {sous_titre}
             </td>
-            <td style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">
-                <span style="{style_deci}">{statuts[domaine]['Deci']}</span>
+            <td style="padding: 12px; border: 1px solid #e0e0e0; text-align: center; color: {couleur_pbi}; font-weight: bold;">
+                {statuts[domaine]['PBI']}
+            </td>
+            <td style="padding: 12px; border: 1px solid #e0e0e0; text-align: center; color: {couleur_deci}; font-weight: bold;">
+                {statuts[domaine]['Deci']}
             </td>
         </tr>
         """
@@ -67,8 +66,8 @@ def generer_html_tableau(date, statuts, titre, texte_alerte=None):
             <thead>
                 <tr style="background-color: #f9f9f9;">
                     <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Domaine</th>
-                    <th style="padding: 12px; border: 1px solid #e0e0e0;">Power BI</th>
-                    <th style="padding: 12px; border: 1px solid #e0e0e0;">Décisionnel</th>
+                    <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">Power BI</th>
+                    <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">Décisionnel</th>
                 </tr>
             </thead>
             <tbody>{lignes_html}</tbody>
@@ -106,12 +105,12 @@ elif mode == "Partiel ⚠️":
     rapports_ko = st.multiselect("Sélectionnez les rapports KO :", ["SUIVI VENTES UNITAIRES", "FLASH MARQUES PROPRES", "SUIVI DES STOCKS"])
 
 elif mode == "Retard Global 🚨":
-    st.info("Tout est dispo par défaut. Modifie juste ce qui ne l'est pas.")
+    st.info("Tout est dispo par défaut. Modifie juste les lignes en retard.")
     for domaine in DOMAINES.keys():
         col1, col2, col3 = st.columns([2, 1, 1])
         with col1: st.write(f"**{domaine}**")
-        with col2: pbi = st.selectbox(f"PBI {domaine}", ["✅ disponible", "⚠️ en cours"], index=0, key=f"r_pbi_{domaine}", label_visibility="collapsed")
-        with col3: deci = st.selectbox(f"Deci {domaine}", ["✅ disponible", "⚠️ en cours"], index=0, key=f"r_deci_{domaine}", label_visibility="collapsed")
+        with col2: pbi = st.selectbox(f"PBI {domaine}", ["✅ disponible", "⚠️ en cours"], index=0, key=f"x_pbi_{domaine}", label_visibility="collapsed")
+        with col3: deci = st.selectbox(f"Deci {domaine}", ["✅ disponible", "⚠️ en cours"], index=0, key=f"x_deci_{domaine}", label_visibility="collapsed")
         statuts_tableau[domaine] = {"PBI": pbi, "Deci": deci}
 
 if st.button("🚀 ENVOYER L'ALERTE", type="primary"):
