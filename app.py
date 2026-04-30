@@ -1,7 +1,7 @@
 import streamlit as st
 import smtplib
 from email.message import EmailMessage
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # --- CONFIGURATION DE LA PAGE ---
 st.set_page_config(page_title="MyData Monitoring", page_icon="📊")
@@ -94,7 +94,8 @@ def generer_html_tableau(date, statuts):
 st.title("MyData Alerte Dataops 📱")
 
 mode = st.radio("Statut des rapports :", ["Tout OK ✅", "Partiel ⚠️", "Retard Global 🚨"])
-date_sel = datetime.now().strftime("%d %B")
+hier = datetime.now() - timedelta(days=1)
+date_sel = hier.strftime("%d %B")
 
 rapports_selectionnes = []
 statuts_tableau = {}
@@ -120,20 +121,21 @@ st.markdown("---")
 if st.button("🚀 ENVOYER L'ALERTE", type="primary"):
     try:
         if mode == "Tout OK ✅":
-            sujet, html = f"🟢POWERBI : Données du {date_sel} Disponibles", generer_html_vert(date_sel)
+            sujet, html = f"🟢MYDATA : Données du {date_sel} Disponibles", generer_html_vert(date_sel)
         elif mode == "Partiel ⚠️":
             if not rapports_selectionnes:
                 st.error("Sélectionne au moins un rapport !")
                 st.stop()
-            sujet, html = " 🟠POWERBI : Partiellement disponible", generer_html_orange(rapports_selectionnes, date_sel)
+            sujet, html = " 🟠MYDATA : Partiellement disponible", generer_html_orange(rapports_selectionnes, date_sel)
         else:
-            sujet, html = f"🔴POWERBI : Retard sur les Données du {date_sel}", generer_html_tableau(date_sel, statuts_tableau)
+            sujet, html = f"🔴MYDATA : Retard sur les Données du {date_sel}", generer_html_tableau(date_sel, statuts_tableau)
 
         msg = EmailMessage()
         msg['Subject'] = sujet
         msg['From'] = "mydata@galerieslafayette.com"
         msg['To'] = st.secrets["EMAIL_EXPEDITEUR"] 
         msg['Bcc'] = st.secrets["DESTINATAIRE"]
+        msg['Reply-To'] = "mydata@galerieslafayette.com"
         msg.add_alternative(html, subtype='html')
 
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
