@@ -115,12 +115,19 @@ elif mode == "Partiel ⚠️":
     rapports_ko_ok = st.multiselect("Sélectionnez les rapports KO :", ["SUIVI DES VENTES UNITAIRES", "FLASH MARQUES PROPRES", "SUIVI DES STOCKS"])
 
 elif mode == "Retard Global 🚨":
+    st.info("Tout est dispo par défaut. Modifie juste ce qui ne l'est pas.")
+    # MODIFICATION ICI POUR L'AFFICHAGE MOBILE
     for domaine in DOMAINES.keys():
-        col1, col2, col3 = st.columns([2, 1, 1])
-        with col1: st.write(f"**{domaine}**")
-        with col2: pbi = st.selectbox(f"PBI {domaine}", ["✅ disponible", "⚠️ en cours"], index=0, key=f"z_pbi_{domaine}", label_visibility="collapsed")
-        with col3: deci = st.selectbox(f"Deci {domaine}", ["✅ disponible", "⚠️ en cours"], index=0, key=f"z_deci_{domaine}", label_visibility="collapsed")
+        st.markdown(f"**🔹 {domaine}**") # Le nom du domaine est bien visible
+        col1, col2 = st.columns(2)
+        with col1: 
+            # On affiche clairement "Power BI" au-dessus du menu
+            pbi = st.selectbox("Power BI", ["✅ disponible", "⚠️ en cours"], index=0, key=f"z_pbi_{domaine}")
+        with col2: 
+            # On affiche clairement "Décisionnel" au-dessus du menu
+            deci = st.selectbox("Décisionnel", ["✅ disponible", "⚠️ en cours"], index=0, key=f"z_deci_{domaine}")
         statuts_tableau[domaine] = {"PBI": pbi, "Deci": deci}
+        st.markdown("---") # Une petite ligne pour séparer proprement chaque domaine
 
 if st.button("🚀 ENVOYER L'ALERTE", type="primary"):
     try:
