@@ -80,16 +80,16 @@ def generer_html_liste_ok(rapports, date):
     </div>
     """
 
-# --- FONCTION ORANGE ---
-def generer_html_orange(rapports, date):
+# --- FONCTION ORANGE (MODIFIÉE POUR J-1) ---
+def generer_html_orange(rapports):
     liste = "".join([f"<li>{r}</li>" for r in rapports])
     return f"""
     <div style="background-color: #f0f2f5; padding: 20px; font-family: Arial, sans-serif;">
         <div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
-            <h2 style="margin: 0; color: #000;"><img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | Données du {date} partiellement disponibles</h2>
+            <h2 style="margin: 0; color: #000;"><img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | J-1 partiellement disponible</h2>
         </div>
         <div style="background-color: white; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0; border-left: 5px solid #FF9800;">
-            <p style="font-weight: bold;">⚠️ Suite à des retards de traitements, les données sont indisponibles pour les rapports suivants :</p>
+            <p style="font-weight: bold;">⚠️ Suite à des retards, les données sont indisponibles pour :</p>
             <ul>{liste}</ul>
             <p>L'ensemble des autres rapports est intégralement disponible.</p>
         </div>
@@ -116,30 +116,28 @@ elif mode == "Partiel ⚠️":
 
 elif mode == "Retard Global 🚨":
     st.info("Tout est dispo par défaut. Modifie juste ce qui ne l'est pas.")
-    # MODIFICATION ICI POUR L'AFFICHAGE MOBILE
     for domaine in DOMAINES.keys():
-        st.markdown(f"**🔹 {domaine}**") # Le nom du domaine est bien visible
+        st.markdown(f"**🔹 {domaine}**")
         col1, col2 = st.columns(2)
         with col1: 
-            # On affiche clairement "Power BI" au-dessus du menu
             pbi = st.selectbox("Power BI", ["✅ disponible", "⚠️ en cours"], index=0, key=f"z_pbi_{domaine}")
         with col2: 
-            # On affiche clairement "Décisionnel" au-dessus du menu
             deci = st.selectbox("Décisionnel", ["✅ disponible", "⚠️ en cours"], index=0, key=f"z_deci_{domaine}")
         statuts_tableau[domaine] = {"PBI": pbi, "Deci": deci}
-        st.markdown("---") # Une petite ligne pour séparer proprement chaque domaine
+        st.markdown("---")
 
 if st.button("🚀 ENVOYER L'ALERTE", type="primary"):
     try:
         if mode == "Tout OK ✅":
             if format_ok == "Tableau complet":
-                sujet, html = f"🟢 MYDATA : Données du {date_str} Disponibles", generer_html_tableau(date_str, statuts_tableau, "Données Disponibles")
+                sujet, html = f"🟢 POWERBI : Données du {date_str} Disponibles", generer_html_tableau(date_str, statuts_tableau, "Données Disponibles")
             else:
-                sujet, html = f"🟢 MYDATA : J-1 Intégralement disponible", generer_html_liste_ok(rapports_ko_ok, date_str)
+                sujet, html = f"🟢 POWERBI : J-1 Intégralement disponible", generer_html_liste_ok(rapports_ko_ok, date_str)
         elif mode == "Partiel ⚠️":
-            sujet, html = f"🟠 MYDATA : Partiellement disponible ({date_str})", generer_html_orange(rapports_ko_ok, date_str)
+            # MODIFICATION ICI : On fige le sujet avec J-1
+            sujet, html = "🟠 POWERBI : Partiellement disponible", generer_html_orange(rapports_ko_ok)
         else:
-            sujet, html = f"🔴 MYDATA : Retard sur les Données du {date_str}", generer_html_tableau(date_str, statuts_tableau, "Retard sur les Données", "⚠️ Suite à des retards dans les traitements, les données sont incomplètes.")
+            sujet, html = f"🔴 POWERBI : Retard sur les Données du {date_str}", generer_html_tableau(date_str, statuts_tableau, "Retard sur les Données", "⚠️ Suite à des retards dans les traitements, les données sont incomplètes.")
 
         msg = EmailMessage()
         msg['Subject'] = sujet
