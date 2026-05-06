@@ -130,14 +130,14 @@ if st.button("🚀 ENVOYER L'ALERTE", type="primary"):
     try:
         if mode == "Tout OK ✅":
             if format_ok == "Tableau complet":
-                sujet, html = f"🟢 POWERBI : Données du {date_str} Disponibles", generer_html_tableau(date_str, statuts_tableau, "Données Disponibles")
+                sujet, html = f"🟢 MYDATA : Données du {date_str} Disponibles", generer_html_tableau(date_str, statuts_tableau, "Données Disponibles")
             else:
-                sujet, html = f"🟢 POWERBI : J-1 Intégralement disponible", generer_html_liste_ok(rapports_ko_ok, date_str)
+                sujet, html = f"🟢 MYDATA : J-1 Intégralement disponible", generer_html_liste_ok(rapports_ko_ok, date_str)
         elif mode == "Partiel ⚠️":
             # MODIFICATION ICI : On fige le sujet avec J-1
-            sujet, html = "🟠 POWERBI : Partiellement disponible", generer_html_orange(rapports_ko_ok)
+            sujet, html = "🟠 MYDATA : Partiellement disponible", generer_html_orange(rapports_ko_ok)
         else:
-            sujet, html = f"🔴 POWERBI : Retard sur les Données du {date_str}", generer_html_tableau(date_str, statuts_tableau, "Retard sur les Données", "⚠️ Suite à des retards dans les traitements, les données sont incomplètes.")
+            sujet, html = f"🔴 MYDATA : Retard sur les Données du {date_str}", generer_html_tableau(date_str, statuts_tableau, "Retard sur les Données", "⚠️ Suite à des retards dans les traitements, les données sont incomplètes.")
 
         msg = EmailMessage()
         msg['Subject'] = sujet
