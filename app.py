@@ -30,9 +30,13 @@ def sauvegarder_historique(date_donnees, type_alerte):
     else:
         nouveau_statut.to_csv(FICHIER_HISTORIQUE, index=False)
 
-# --- CALCUL DE LA DATE ---
-hier_par_defaut = datetime.now() - timedelta(days=1)
+# --- CALCUL DE LA DATE ET DU "J-X" ---
+aujourd_hui = datetime.now().date()
+hier_par_defaut = aujourd_hui - timedelta(days=1)
 date_choisie = st.date_input("📅 Sélectionner la date des données :", hier_par_defaut)
+
+ecart_jours = (aujourd_hui - date_choisie).days
+j_str = f"J-{ecart_jours}" if ecart_jours > 0 else "J-0"
 
 mois_fr = {
     "January": "Janvier", "February": "Février", "March": "Mars", "April": "Avril",
@@ -41,8 +45,7 @@ mois_fr = {
 }
 date_str = f"{date_choisie.strftime('%d')} {mois_fr[date_choisie.strftime('%B')]}"
 
-# --- FONCTIONS HTML (INTACTES) ---
-# --- FONCTIONS HTML ---
+# --- FONCTIONS HTML (BIEN AÉRÉES) ---
 def generer_html_tableau(date, statuts, titre, texte_alerte=None):
     lignes_html = ""
     for domaine, sous_titre in DOMAINES.items():
@@ -52,18 +55,87 @@ def generer_html_tableau(date, statuts, titre, texte_alerte=None):
         couleur_deci = "#2E7D32" if is_deci_ok else "#E65100"
         bordure_gauche = "5px solid #4CAF50" if (is_pbi_ok and is_deci_ok) else "5px solid #FF9800"
 
-        lignes_html += f"<tr><td style='padding: 12px; border: 1px solid #e0e0e0; font-weight: bold; border-left: {bordure_gauche}; text-align: left;'>{domaine} {sous_titre}</td><td style='padding: 12px; border: 1px solid #e0e0e0; text-align: center; color: {couleur_pbi}; font-weight: bold;'>{statuts[domaine]['PBI']}</td><td style='padding: 12px; border: 1px solid #e0e0e0; text-align: center; color: {couleur_deci}; font-weight: bold;'>{statuts[domaine]['Deci']}</td></tr>"
+        lignes_html += f"""
+        <tr>
+            <td style="padding: 12px; border: 1px solid #e0e0e0; font-weight: bold; border-left: {bordure_gauche}; text-align: left;">
+                {domaine} {sous_titre}
+            </td>
+            <td style="padding: 12px; border: 1px solid #e0e0e0; text-align: center; color: {couleur_pbi}; font-weight: bold;">
+                {statuts[domaine]['PBI']}
+            </td>
+            <td style="padding: 12px; border: 1px solid #e0e0e0; text-align: center; color: {couleur_deci}; font-weight: bold;">
+                {statuts[domaine]['Deci']}
+            </td>
+        </tr>
+        """
     
-    alerte_box = f'<div style="background-color: white; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0; margin-bottom: 15px;"><p style="font-weight: bold;">{texte_alerte}</p></div>' if texte_alerte else ""
-    return f"""<div style="background-color: #f0f2f5; padding: 20px; font-family: Arial, sans-serif;"><div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0;"><h2 style="margin: 0; color: #000;"><img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | {titre} {date}</h2></div>{alerte_box}<table style="width: 100%; background-color: white; border-collapse: collapse; border: 1px solid #e0e0e0; font-size: 14px;"><thead><tr style="background-color: #f9f9f9;"><th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Domaine</th><th style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">Power BI</th><th style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">Décisionnel</th></tr></thead><tbody>{lignes_html}</tbody></table></div>"""
+    alerte_box = f"""
+        <div style="background-color: white; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0; margin-bottom: 15px;">
+            <p style="font-weight: bold;">{texte_alerte}</p>
+        </div>
+    """ if texte_alerte else ""
 
-def generer_html_liste_ok(rapports, date):
-    liste = "".join([f"<li>{r}</li>" for r in rapports])
-    return f"""<div style="background-color: #f0f2f5; padding: 20px; font-family: Arial, sans-serif;"><div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0;"><h2 style="margin: 0; color: #000;"><img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | POWERBI : J-1 Intégralement disponible</h2></div><div style="background-color: white; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0; border-left: 5px solid #4CAF50;"><p style="font-weight: bold;">✅ Les rapports suivants sont maintenant à jour avec le J-1 ({date}) :</p><ul style="list-style-type: none; padding-left: 0; font-weight: bold;">{liste}</ul><p>Merci de votre compréhension</p></div></div>"""
+    return f"""
+    <div style="background-color: #f0f2f5; padding: 20px; font-family: Arial, sans-serif;">
+        <div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
+            <h2 style="margin: 0; color: #000;">
+                <img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | {titre} {date}
+            </h2>
+        </div>
+        {alerte_box}
+        <table style="width: 100%; background-color: white; border-collapse: collapse; border: 1px solid #e0e0e0; font-size: 14px;">
+            <thead>
+                <tr style="background-color: #f9f9f9;">
+                    <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Domaine</th>
+                    <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">Power BI</th>
+                    <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: center;">Décisionnel</th>
+                </tr>
+            </thead>
+            <tbody>
+                {lignes_html}
+            </tbody>
+        </table>
+    </div>
+    """
 
-def generer_html_orange(rapports):
+def generer_html_liste_ok(rapports, date, type_j):
     liste = "".join([f"<li>{r}</li>" for r in rapports])
-    return f"""<div style="background-color: #f0f2f5; padding: 20px; font-family: Arial, sans-serif;"><div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0;"><h2 style="margin: 0; color: #000;"><img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | J-1 partiellement disponible</h2></div><div style="background-color: white; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0; border-left: 5px solid #FF9800;"><p style="font-weight: bold;">⚠️ Suite à des retards, les données sont indisponibles pour :</p><ul>{liste}</ul><p>L'ensemble des autres rapports est intégralement disponible.</p></div></div>"""
+    return f"""
+    <div style="background-color: #f0f2f5; padding: 20px; font-family: Arial, sans-serif;">
+        <div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
+            <h2 style="margin: 0; color: #000;">
+                <img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | {type_j} Intégralement disponible
+            </h2>
+        </div>
+        <div style="background-color: white; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0; border-left: 5px solid #4CAF50;">
+            <p style="font-weight: bold;">✅ Les rapports suivants sont maintenant à jour avec le {type_j} ({date}) :</p>
+            <ul style="list-style-type: none; padding-left: 0; font-weight: bold;">
+                {liste}
+            </ul>
+            <p>Merci de votre compréhension</p>
+        </div>
+    </div>
+    """
+
+def generer_html_orange(rapports, type_j, message_alerte):
+    liste = "".join([f"<li>{r}</li>" for r in rapports])
+    return f"""
+    <div style="background-color: #f0f2f5; padding: 20px; font-family: Arial, sans-serif;">
+        <div style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
+            <h2 style="margin: 0; color: #000;">
+                <img src="{URL_LOGO}" height="35" style="vertical-align:middle;"> | {type_j} partiellement disponible
+            </h2>
+        </div>
+        <div style="background-color: white; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0; border-left: 5px solid #FF9800;">
+            <p style="font-weight: bold;">{message_alerte}</p>
+            <ul>
+                {liste}
+            </ul>
+            <p>L'ensemble des autres rapports est intégralement disponible.</p>
+        </div>
+    </div>
+    """
+
 # ==========================================
 # --- CRÉATION DES ONGLETS (TABS) ---
 # ==========================================
@@ -73,7 +145,7 @@ tab1, tab2 = st.tabs(["🚀 Créer une Alerte", "🗄️ Historique des envois"]
 # --- ONGLET 1 : L'APPLICATION PRINCIPALE ---
 # ==========================================
 with tab1:
-    st.subheader(f"Statut pour le : {date_str}")
+    st.subheader(f"Statut pour le : {date_str} ({j_str})")
     mode = st.radio("Statut des rapports :", ["Tout OK ✅", "Partiel ⚠️", "Retard Global 🚨"])
 
     statuts_tableau = {}
@@ -87,17 +159,20 @@ with tab1:
         format_ok = st.selectbox("Format du mail :", ["Tableau complet", "Liste de rapports"])
         if format_ok == "Liste de rapports":
             rapports_ko_ok = st.multiselect("Rapports à afficher :", ["SUIVI DES VENTES UNITAIRES", "FLASH MARQUES PROPRES", "SUIVI DES STOCKS"], default=["SUIVI DES VENTES UNITAIRES", "FLASH MARQUES PROPRES"])
-            sujet_mail, html_mail = f"🟢 POWERBI : J-1 Intégralement disponible", generer_html_liste_ok(rapports_ko_ok, date_str)
+            sujet_mail, html_mail = f"🟢 MYDATA : {j_str} Intégralement disponible", generer_html_liste_ok(rapports_ko_ok, date_str, j_str)
         else:
             for dom in DOMAINES.keys(): statuts_tableau[dom] = {"PBI": "✅ disponible", "Deci": "✅ disponible"}
-            sujet_mail, html_mail = f"🟢 POWERBI : Données du {date_str} Disponibles", generer_html_tableau(date_str, statuts_tableau, "Données Disponibles")
+            sujet_mail, html_mail = f"🟢 MYDATA : Données du {date_str} Disponibles", generer_html_tableau(date_str, statuts_tableau, "Données Disponibles")
 
     elif mode == "Partiel ⚠️":
         rapports_ko_ok = st.multiselect("Sélectionnez les rapports KO :", ["SUIVI DES VENTES UNITAIRES", "FLASH MARQUES PROPRES", "SUIVI DES STOCKS"])
-        sujet_mail, html_mail = "🟠 POWERBI : Partiellement disponible", generer_html_orange(rapports_ko_ok)
+        texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards, les données sont indisponibles pour :")
+        sujet_mail, html_mail = f"🟠 MYDATA : Partiellement disponible ({j_str})", generer_html_orange(rapports_ko_ok, j_str, texte_perso)
 
     elif mode == "Retard Global 🚨":
-        st.info("Tout est dispo par défaut. Modifie juste ce qui ne l'est pas.")
+        texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards dans les traitements, les données sont incomplètes.")
+        st.info("Modifie les domaines en retard ci-dessous :")
+        
         for domaine in DOMAINES.keys():
             st.markdown(f"**🔹 {domaine}**")
             col1, col2 = st.columns(2)
@@ -105,7 +180,7 @@ with tab1:
             with col2: deci = st.selectbox("Décisionnel", ["✅ disponible", "⚠️ en cours"], index=0, key=f"z_deci_{domaine}")
             statuts_tableau[domaine] = {"PBI": pbi, "Deci": deci}
             st.markdown("---")
-        sujet_mail, html_mail = f"🔴 POWERBI : Retard sur les Données du {date_str}", generer_html_tableau(date_str, statuts_tableau, "Retard sur les Données", "⚠️ Suite à des retards dans les traitements, les données sont incomplètes.")
+        sujet_mail, html_mail = f"🔴 MYDATA : Retard sur les Données du {date_str}", generer_html_tableau(date_str, statuts_tableau, "Retard sur les Données", texte_perso)
 
     # -- APERÇU DU MAIL --
     with st.expander("👀 Voir l'aperçu du mail avant envoi", expanded=False):
@@ -128,10 +203,9 @@ with tab1:
                 server.login(st.secrets["EMAIL_EXPEDITEUR"], st.secrets["PASSWORD"])
                 server.send_message(msg)
             
-            # Action de succès
-            sauvegarder_historique(date_str, mode) # On log dans le fichier CSV
+            sauvegarder_historique(date_str, mode)
             st.success(f"✅ Alerte envoyée avec succès !")
-            st.balloons() # 🎉 Célébration
+            st.balloons()
         except Exception as e:
             st.error(f"Erreur : {e}")
 
@@ -144,7 +218,6 @@ with tab2:
     
     if os.path.exists(FICHIER_HISTORIQUE):
         df_historique = pd.read_csv(FICHIER_HISTORIQUE)
-        # On affiche le tableau en pleine largeur et inversé (les plus récents en haut)
         st.dataframe(df_historique.iloc[::-1], use_container_width=True, hide_index=True)
     else:
         st.info("Aucun historique pour le moment. Le registre se créera au premier envoi.")
