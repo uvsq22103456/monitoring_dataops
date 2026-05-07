@@ -158,8 +158,18 @@ with tab1:
         st.write(f"**Sujet de l'email :** {sujet_mail}")
         components.html(html_mail, height=450, scrolling=True)
 
-    # -- BOUTON D'ENVOI --
-    if st.button("🚀 ENVOYER L'ALERTE", type="primary", use_container_width=True):
+    # -- BOUTONS D'ACTION --
+    if mode != "Tout OK ✅":
+        col_btn1, col_btn2 = st.columns(2)
+        with col_btn1:
+            envoi_mail = st.button("🚀 ENVOYER L'ALERTE (Mail)", type="primary", use_container_width=True)
+        with col_btn2:
+            envoi_silencieux = st.button("🔕 ENREGISTRER SANS MAIL (< 8h30)", use_container_width=True)
+    else:
+        envoi_mail = st.button("🚀 ENVOYER L'ALERTE (Mail)", type="primary", use_container_width=True)
+        envoi_silencieux = False
+
+    if envoi_mail:
         try:
             msg = EmailMessage()
             msg['Subject'] = sujet_mail
@@ -174,13 +184,19 @@ with tab1:
                 server.login(st.secrets["EMAIL_EXPEDITEUR"], st.secrets["PASSWORD"])
                 server.send_message(msg)
             
-            # Sauvegarde enrichie dans le CSV !
+            # Sauvegarde standard pour un vrai retard
             sauvegarder_historique(date_str, impact_propre, app_origine, source_incident, action_cor, statut_res)
             
             st.success(f"✅ Alerte envoyée avec succès !")
             st.balloons()
         except Exception as e:
             st.error(f"Erreur : {e}")
+
+    if envoi_silencieux:
+        # Sauvegarde spéciale "Fantôme"
+        sauvegarder_historique(date_str, "Sans impact", app_origine, source_incident, action_cor, "✅ Résolu")
+        st.success("🔕 Incident enregistré dans l'historique (Aucun mail envoyé) !")
+        
 
 # ==========================================
 # --- ONGLET 2 : L'HISTORIQUE ---
