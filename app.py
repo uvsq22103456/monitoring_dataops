@@ -169,19 +169,34 @@ with tab1:
         texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards, les données sont indisponibles pour :")
         sujet_mail, html_mail = f"🟠 MYDATA : Partiellement disponible ({j_str})", generer_html_orange(rapports_ko_ok, j_str, texte_perso)
 
-    elif mode == "Retard Global 🚨":
+   elif mode == "Retard Global 🚨":
         texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards dans les traitements, les données sont incomplètes.")
-        st.info("Modifie les domaines en retard ci-dessous :")
+        st.info("Décochez simplement les cases en retard dans le tableau ci-dessous :")
         
-        for domaine in DOMAINES.keys():
-            st.markdown(f"**🔹 {domaine}**")
-            col1, col2 = st.columns(2)
-            with col1: pbi = st.selectbox("Power BI", ["✅ disponible", "⚠️ en cours"], index=0, key=f"z_pbi_{domaine}")
-            with col2: deci = st.selectbox("Décisionnel", ["✅ disponible", "⚠️ en cours"], index=0, key=f"z_deci_{domaine}")
-            statuts_tableau[domaine] = {"PBI": pbi, "Deci": deci}
-            st.markdown("---")
-        sujet_mail, html_mail = f"🔴 MYDATA : Retard sur les Données du {date_str}", generer_html_tableau(date_str, statuts_tableau, "Retard sur les Données", texte_perso)
+        # 1. On prépare un tableau où tout est coché "Vrai" (Disponible) par défaut
+        donnees_tableau = {
+            "Domaine": list(DOMAINES.keys()),
+            "Power BI ✅": [True] * len(DOMAINES),
+            "Décisionnel ✅": [True] * len(DOMAINES)
+        }
+        df_statuts = pd.DataFrame(donnees_tableau)
 
+        # 2. On affiche le tableau interactif ultra-compact
+        df_modifie = st.data_editor(
+            df_statuts,
+            hide_index=True,
+            use_container_width=True,
+            disabled=["Domaine"], # On empêche de modifier le nom des domaines par erreur
+        )
+
+        # 3. On traduit les cases cochées/décochées en texte pour ton mail
+        for index, row in df_modifie.iterrows():
+            domaine = row["Domaine"]
+            pbi = "✅ disponible" if row["Power BI ✅"] else "⚠️ en cours"
+            deci = "✅ disponible" if row["Décisionnel ✅"] else "⚠️ en cours"
+            statuts_tableau[domaine] = {"PBI": pbi, "Deci": deci}
+
+        sujet_mail, html_mail = f"🔴 MYDATA : Retard sur les Données du {date_str}", generer_html_tableau(date_str, statuts_tableau, "Retard sur les Données", texte_perso)
     # -- APERÇU DU MAIL --
     with st.expander("👀 Voir l'aperçu du mail avant envoi", expanded=False):
         st.write(f"**Sujet de l'email :** {sujet_mail}")
