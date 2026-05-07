@@ -138,7 +138,11 @@ with tab1:
             statuts_tableau[domaine] = {"PBI": pbi, "Deci": deci}
 
         sujet_mail, html_mail = f"🔴 MYDATA : Retard sur les Données du {date_str}", generer_html_tableau(date_str, statuts_tableau, "Retard sur les Données", texte_perso)
-
+    # -- APERÇU DU MAIL --
+    with st.expander("👀 Voir l'aperçu du mail avant envoi", expanded=False):
+        st.write(f"**Sujet de l'email :** {sujet_mail}")
+        components.html(html_mail, height=450, scrolling=True)
+        
     # --- NOUVEAU : BLOC TECHNIQUE (INVISIBLE DANS LE MAIL, JUSTE POUR L'HISTORIQUE) ---
     if mode != "Tout OK ✅":
         st.markdown("---")
@@ -153,10 +157,7 @@ with tab1:
             source_incident = st.selectbox("Source :", ["Intra data", "Extra data"])
             action_cor = st.text_input("Action corrective :", "Refresh des tables GCP et relance des datasets...")
 
-    # -- APERÇU DU MAIL --
-    with st.expander("👀 Voir l'aperçu du mail avant envoi", expanded=False):
-        st.write(f"**Sujet de l'email :** {sujet_mail}")
-        components.html(html_mail, height=450, scrolling=True)
+   
 
     # -- BOUTONS D'ACTION --
     if mode != "Tout OK ✅":
@@ -206,32 +207,34 @@ with tab2:
     
     if os.path.exists(FICHIER_HISTORIQUE):
         try:
-            # On essaie de lire le fichier
             df_historique = pd.read_csv(FICHIER_HISTORIQUE)
             
             st.write("💡 *Vous pouvez modifier les lignes (ex: passer un incident en 'Résolu') puis cliquer sur Sauvegarder.*")
             
             df_edite = st.data_editor(df_historique.iloc[::-1], use_container_width=True, hide_index=True, num_rows="dynamic")
             
+            st.markdown("---")
             col_save, col_clear = st.columns([1, 1])
+            
             with col_save:
-                if st.button("💾 Sauvegarder les modifications"):
+                if st.button("💾 Sauvegarder les modifications", type="primary"):
                     df_edite.iloc[::-1].to_csv(FICHIER_HISTORIQUE, index=False)
                     st.success("✅ Historique mis à jour !")
                     st.rerun()
             
             with col_clear:
-                if st.button("🗑️ Tout effacer (Reset)", type="secondary"):
-                    st.warning("Êtes-vous sûr de vouloir supprimer TOUT l'historique ?")
-                    if st.button("OUI, TOUT SUPPRIMER"):
-                        os.remove(FICHIER_HISTORIQUE)
-                        st.success("L'historique a été réinitialisé.")
+                # CORRECTION ICI : Case à cocher pour confirmer
+                st.markdown("🗑️ **Vider le registre**")
+                confirmation = st.checkbox("Je confirme vouloir supprimer tout l'historique")
+                
+                if confirmation:
+                    if st.button("🚨 OUI, TOUT SUPPRIMER"):
+                        if os.path.exists(FICHIER_HISTORIQUE):
+                            os.remove(FICHIER_HISTORIQUE)
                         st.rerun()
                         
         except pd.errors.ParserError:
-            # Si le fichier a l'ancien format (3 colonnes) et fait crasher Pandas
-            st.error("⚠️ L'ancien fichier d'historique de test est incompatible avec la nouvelle version (nouvelles colonnes manquantes).")
-            st.info("Cliquez ci-dessous pour le supprimer et débloquer l'application.")
+            st.error("⚠️ L'ancien fichier d'historique de test est incompatible avec la nouvelle version.")
             if st.button("🔄 Effacer l'ancien historique et réparer l'application"):
                 os.remove(FICHIER_HISTORIQUE)
                 st.rerun()
