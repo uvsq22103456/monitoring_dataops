@@ -245,17 +245,28 @@ with tab2:
     else:
         st.info("Aucun historique pour le moment. Le registre se créera au premier envoi.")
 # --- CODE DE TEST FORCE ---
-st.sidebar.title("🛠️ Zone de Test")
-if st.sidebar.button("Forcer la création du CSV"):
-    maintenant = datetime.now(ZoneInfo("Europe/Paris")).strftime("%d/%m/%Y %H:%M:%S")
-    test_data = pd.DataFrame([{
-        "Date de l'alerte": maintenant,
-        "Date des données": "Test",
-        "Impact utilisateur": "Test",
-        "APP (Origine)": "Test",
-        "Source": "Test",
-        "Action Corrective": "Test",
-        "Statut de l'incident": "Test"
-    }])
-    test_data.to_csv(FICHIER_HISTORIQUE, index=False)
-    st.sidebar.success("Fichier CSV créé avec succès !")
+# --- ZONE DE VISUALISATION (À METTRE TOUT EN BAS DU FICHIER) ---
+st.write("---") 
+st.subheader("📊 Historique des alertes")
+
+# 1. On vérifie si le fichier existe sur le serveur Streamlit
+if os.path.exists(FICHIER_HISTORIQUE):
+    # 2. On lit le fichier pour l'afficher dans l'appli
+    df_visu = pd.read_csv(FICHIER_HISTORIQUE)
+    
+    # 3. On affiche le tableau (ton tuteur verra ça en direct !)
+    st.dataframe(df_visu, use_container_width=True)
+    
+    # 4. On ajoute le bouton pour que tu puisses le télécharger sur ton PC
+    with open(FICHIER_HISTORIQUE, "rb") as file:
+        st.download_button(
+            label="📥 Télécharger l'historique CSV",
+            data=file,
+            file_name="historique_alertes.csv",
+            mime="text/csv"
+        )
+else:
+    # Si le fichier n'existe pas encore
+    st.info("L'historique apparaîtra ici après le premier envoi d'alerte.")
+
+    
