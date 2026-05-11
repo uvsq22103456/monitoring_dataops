@@ -215,10 +215,11 @@ with tab2:
             
             st.write("💡 *Vous pouvez modifier les lignes (ex: passer un incident en 'Résolu') puis cliquer sur Sauvegarder.*")
             
+            # Ton tableau éditable (C'est ton meilleur atout démo !)
             df_edite = st.data_editor(df_historique.iloc[::-1], use_container_width=True, hide_index=True, num_rows="dynamic")
             
             st.markdown("---")
-            col_save, col_clear = st.columns([1, 1])
+            col_save, col_clear, col_download = st.columns([1, 1, 1])
             
             with col_save:
                 if st.button("💾 Sauvegarder les modifications", type="primary"):
@@ -227,46 +228,33 @@ with tab2:
                     st.rerun()
             
             with col_clear:
-                # CORRECTION ICI : Case à cocher pour confirmer
                 st.markdown("🗑️ **Vider le registre**")
-                confirmation = st.checkbox("Je confirme vouloir supprimer tout l'historique")
-                
+                confirmation = st.checkbox("Confirmer la suppression totale")
                 if confirmation:
                     if st.button("🚨 OUI, TOUT SUPPRIMER"):
                         if os.path.exists(FICHIER_HISTORIQUE):
                             os.remove(FICHIER_HISTORIQUE)
                         st.rerun()
+
+            with col_download:
+                st.markdown("📥 **Export Power BI**")
+                # On met le bouton de téléchargement ici, c'est plus propre !
+                with open(FICHIER_HISTORIQUE, "rb") as file:
+                    st.download_button(
+                        label="Télécharger le CSV",
+                        data=file,
+                        file_name="historique_alertes.csv",
+                        mime="text/csv"
+                    )
                         
         except pd.errors.ParserError:
-            st.error("⚠️ L'ancien fichier d'historique de test est incompatible avec la nouvelle version.")
-            if st.button("🔄 Effacer l'ancien historique et réparer l'application"):
+            st.error("⚠️ Erreur de lecture du fichier.")
+            if st.button("🔄 Réinitialiser le fichier"):
                 os.remove(FICHIER_HISTORIQUE)
                 st.rerun()
     else:
         st.info("Aucun historique pour le moment. Le registre se créera au premier envoi.")
-# --- CODE DE TEST FORCE ---
-# --- ZONE DE VISUALISATION (À METTRE TOUT EN BAS DU FICHIER) ---
-st.write("---") 
-st.subheader("📊 Historique des alertes")
 
-# 1. On vérifie si le fichier existe sur le serveur Streamlit
-if os.path.exists(FICHIER_HISTORIQUE):
-    # 2. On lit le fichier pour l'afficher dans l'appli
-    df_visu = pd.read_csv(FICHIER_HISTORIQUE)
-    
-    # 3. On affiche le tableau (ton tuteur verra ça en direct !)
-    st.dataframe(df_visu, use_container_width=True)
-    
-    # 4. On ajoute le bouton pour que tu puisses le télécharger sur ton PC
-    with open(FICHIER_HISTORIQUE, "rb") as file:
-        st.download_button(
-            label="📥 Télécharger l'historique CSV",
-            data=file,
-            file_name="historique_alertes.csv",
-            mime="text/csv"
-        )
-else:
-    # Si le fichier n'existe pas encore
-    st.info("L'historique apparaîtra ici après le premier envoi d'alerte.")
+# --- SUPPRIME TOUT LE RESTE DU FICHIER APRÈS CETTE LIGNE ---
 
     
