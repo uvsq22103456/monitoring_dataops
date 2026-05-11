@@ -4,12 +4,13 @@ from email.message import EmailMessage
 from datetime import datetime, timedelta
 import streamlit.components.v1 as components
 import pandas as pd
+from streamlit_gsheets import GSheetsConnection
 import os
 from zoneinfo import ZoneInfo
 
 # --- CONFIGURATION ---
 st.set_page_config(page_title="MyData Monitoring", page_icon="📊", layout="centered")
-
+conn = st.connection("gsheets", type=GSheetsConnection)
 URL_LOGO = "https://raw.githubusercontent.com/uvsq22103456/monitoring_dataops/main/logo.png"
 FICHIER_HISTORIQUE = "historique_alertes.csv"
 
@@ -23,8 +24,10 @@ DOMAINES = {
 
 # --- NOUVEAU : FONCTION DE SAUVEGARDE ENRICHIE ---
 def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", source="N/A", action_corrective="N/A", statut_resolution="N/A"):
+    
     maintenant = datetime.now(ZoneInfo("Europe/Paris")).strftime("%d/%m/%Y %H:%M:%S")
-    # On crée une ligne avec TOUTES les colonnes nécessaires pour ton Power BI
+    
+    # 2. On prépare la ligne comme tu l'as fait
     nouvelle_ligne = {
         "Date de l'alerte": maintenant, 
         "Date des données": date_donnees, 
@@ -35,12 +38,26 @@ def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", 
         "Statut de l'incident": statut_resolution
     }
     
-    nouveau_statut = pd.DataFrame([nouvelle_ligne])
+    nouveau_df = pd.DataFrame([nouvelle_ligne])
     
-    if os.path.exists(FICHIER_HISTORIQUE):
-        nouveau_statut.to_csv(FICHIER_HISTORIQUE, mode='a', header=False, index=False)
-    else:
-        nouveau_statut.to_csv(FICHIER_HISTORIQUE, index=False)
+    # --- REMPLACEMENT DU CSV PAR GOOGLE SHEETS ---
+    try:
+        # 3. On lit les données déjà présentes dans le Google Sheet
+        
+        df_existant = conn.read()
+        
+        # 4. On ajoute ta nouvelle ligne à la suite des anciennes
+        df_final = pd.concat([df_existant, nouveau_df], ignore_index=True)
+        
+        # 5. On met à jour le Google Sheet avec le nouveau tableau complet
+        conn.update(data=df_final)
+        
+        st.success("✅ Historique sauvegardé dans Google Sheets")
+        
+    except Exception as e:
+        st.error(f"Erreur de sauvegarde : {e}")
+        # Optionnel : garder une trace CSV en secours si le Cloud plante
+        nouveau_df.to_csv("backup_alerte.csv", mode='a', header=False, index=False)
 
 # --- CALCUL DE LA DATE ET DU "J-X" ---
 aujourd_hui = datetime.now().date()
