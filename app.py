@@ -27,7 +27,7 @@ def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", 
     
     maintenant = datetime.now(ZoneInfo("Europe/Paris")).strftime("%d/%m/%Y %H:%M:%S")
     
-    # 2. On prépare la ligne comme tu l'as fait
+    # On crée une ligne propre
     nouvelle_ligne = {
         "Date de l'alerte": maintenant, 
         "Date des données": date_donnees, 
@@ -38,26 +38,12 @@ def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", 
         "Statut de l'incident": statut_resolution
     }
     
-    nouveau_df = pd.DataFrame([nouvelle_ligne])
+    nouveau_statut = pd.DataFrame([nouvelle_ligne])
     
-    # --- REMPLACEMENT DU CSV PAR GOOGLE SHEETS ---
-    try:
-        # 3. On lit les données déjà présentes dans le Google Sheet
-        
-        df_existant = conn.read()
-        
-        # 4. On ajoute ta nouvelle ligne à la suite des anciennes
-        df_final = pd.concat([df_existant, nouveau_df], ignore_index=True)
-        
-        # 5. On met à jour le Google Sheet avec le nouveau tableau complet
-        conn.update(data=df_final)
-        
-        st.success("✅ Historique sauvegardé dans Google Sheets")
-        
-    except Exception as e:
-        st.error(f"Erreur de sauvegarde : {e}")
-        # Optionnel : garder une trace CSV en secours si le Cloud plante
-        nouveau_df.to_csv("backup_alerte.csv", mode='a', header=False, index=False)
+    if os.path.exists(FICHIER_HISTORIQUE):
+        nouveau_statut.to_csv(FICHIER_HISTORIQUE, mode='a', header=False, index=False)
+    else:
+        nouveau_statut.to_csv(FICHIER_HISTORIQUE, index=False)
 
 # --- CALCUL DE LA DATE ET DU "J-X" ---
 aujourd_hui = datetime.now().date()
