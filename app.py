@@ -23,7 +23,7 @@ DOMAINES = {
 
 # --- NOUVEAU : FONCTION DE SAUVEGARDE ENRICHIE ---
 def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", source="N/A", action_corrective="N/A", statut_resolution="N/A"):
-    maintenant = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    maintenant = datetime.now(ZoneInfo("Europe/Paris")).strftime("%d/%m/%Y %H:%M:%S")
     # On crée une ligne avec TOUTES les colonnes nécessaires pour ton Power BI
     nouvelle_ligne = {
         "Date de l'alerte": maintenant, 
@@ -55,7 +55,7 @@ mois_fr = {
     "May": "Mai", "June": "Juin", "July": "Juillet", "August": "Août",
     "September": "Septembre", "October": "Octobre", "November": "Novembre", "December": "Décembre"
 }
-date_str = datetime.now(ZoneInfo("Europe/Paris")).strftime("%d/%m/%Y %H:%M:%S")
+date_str = f"{date_choisie.strftime('%d')} {mois_fr[date_choisie.strftime('%B')]}"
 
 # --- FONCTIONS HTML (INTACTES) ---
 def generer_html_tableau(date, statuts, titre, texte_alerte=None):
