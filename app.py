@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import streamlit.components.v1 as components
 import pandas as pd
 import os
+from zoneinfo import ZoneInfo
 
 # --- CONFIGURATION ---
 st.set_page_config(page_title="MyData Monitoring", page_icon="📊", layout="centered")
@@ -54,7 +55,7 @@ mois_fr = {
     "May": "Mai", "June": "Juin", "July": "Juillet", "August": "Août",
     "September": "Septembre", "October": "Octobre", "November": "Novembre", "December": "Décembre"
 }
-date_str = f"{date_choisie.strftime('%d')} {mois_fr[date_choisie.strftime('%B')]}"
+date_str = datetime.now(ZoneInfo("Europe/Paris")).strftime("%d/%m/%Y %H:%M:%S")
 
 # --- FONCTIONS HTML (INTACTES) ---
 def generer_html_tableau(date, statuts, titre, texte_alerte=None):
