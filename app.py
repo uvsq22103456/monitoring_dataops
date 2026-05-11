@@ -244,3 +244,18 @@ with tab2:
                 st.rerun()
     else:
         st.info("Aucun historique pour le moment. Le registre se créera au premier envoi.")
+# --- CODE DE TEST FORCE ---
+st.sidebar.title("🛠️ Zone de Test")
+if st.sidebar.button("Forcer la création du CSV"):
+    maintenant = datetime.now(ZoneInfo("Europe/Paris")).strftime("%d/%m/%Y %H:%M:%S")
+    test_data = pd.DataFrame([{
+        "Date de l'alerte": maintenant,
+        "Date des données": "Test",
+        "Impact utilisateur": "Test",
+        "APP (Origine)": "Test",
+        "Source": "Test",
+        "Action Corrective": "Test",
+        "Statut de l'incident": "Test"
+    }])
+    test_data.to_csv(FICHIER_HISTORIQUE, index=False)
+    st.sidebar.success("Fichier CSV créé avec succès !")
