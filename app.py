@@ -237,8 +237,7 @@ with tab2:
                         st.rerun()
 
             with col_download:
-                st.markdown("📥 **Export Power BI**")
-                # On met le bouton de téléchargement ici, c'est plus propre !
+                st.markdown("📥 **Export**")
                 with open(FICHIER_HISTORIQUE, "rb") as file:
                     st.download_button(
                         label="Télécharger le CSV",
@@ -255,6 +254,5 @@ with tab2:
     else:
         st.info("Aucun historique pour le moment. Le registre se créera au premier envoi.")
 
-# --- SUPPRIME TOUT LE RESTE DU FICHIER APRÈS CETTE LIGNE ---
 
     
