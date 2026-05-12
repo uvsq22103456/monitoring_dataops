@@ -170,7 +170,7 @@ with tab1:
         LISTE_RAPPORTS_BRUTE.sort()
         
         # 2. Le multiselect avec la barre de recherche native de Streamlit
-        st.write("💡 *Astuce : Cliquez et tapez les premières lettres du rapport pour le trouver.*")
+        st.write("💡 *Astuce : Cliquez et tapez les premières lettres ou des mots du rapport pour le trouver.*")
         rapports_ko_ok = st.multiselect("Sélectionnez les rapports KO :", LISTE_RAPPORTS_BRUTE)
         
         # 3. L'astuce pour les rapports "en cours de route"
