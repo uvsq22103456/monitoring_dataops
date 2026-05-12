@@ -100,7 +100,7 @@ with tab1:
     rapports_ko_ok = []
     format_ok = ""
     sujet_mail = ""
-    html_mail = ""
+    html_mail = "" 
     
     # Variables pour le fichier d'historique (par défaut "N/A" si tout va bien)
     app_origine = "N/A"
@@ -121,10 +121,33 @@ with tab1:
             sujet_mail, html_mail = f"🟢 MYDATA : Données du {date_str} Disponibles", generer_html_tableau(date_str, statuts_tableau, "Données Disponibles")
 
     elif mode == "Partiel ⚠️":
-        impact_propre = "Données Incomplètes" # Le texte exact de ton Power BI
-        rapports_ko_ok = st.multiselect("Sélectionnez les rapports KO :", ["SUIVI DES VENTES UNITAIRES", "FLASH MARQUES PROPRES", "SUIVI DES STOCKS"])
-        texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards, les données sont indisponibles pour :")
-        sujet_mail, html_mail = f"🟠 MYDATA : Partiellement disponible ({j_str})", generer_html_orange(rapports_ko_ok, j_str, texte_perso)
+    impact_propre = "Données Incomplètes"
+    
+    # 1. On définit la liste de base
+    liste_base = ["SUIVI DES VENTES UNITAIRES", "FLASH MARQUES PROPRES", "SUIVI DES STOCKS", "SUIVI PERF CO"]
+    
+    # 2. Le multiselect (on ajoute une option pour saisir à la main)
+    # Note : Tu peux aussi utiliser st.multiselect tel quel et ajouter un text_input à côté
+    rapports_ko_ok = st.multiselect("Sélectionnez les rapports KO :", liste_base)
+    
+    # 3. L'astuce pour les rapports "en cours de route"
+    nouveaux_rapports = st.text_input("✍️ Un autre rapport KO ? (Séparez par une virgule si plusieurs)")
+    
+    # 4. On fusionne les deux listes pour le mail et le CSV
+    liste_finale = rapports_ko_ok
+    if nouveaux_rapports:
+        # On ajoute les noms tapés à la main à la liste
+        extra = [r.strip() for r in nouveaux_rapports.split(",")]
+        liste_finale = liste_finale + extra
+    
+    texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards, les données sont indisponibles pour :")
+    
+    # On transforme la liste en texte propre pour le mail et le CSV
+    rapports_texte = ", ".join(liste_finale)
+    
+    sujet_mail = f"🟠 MYDATA : Partiellement disponible ({j_str})"
+    # On passe 'liste_finale' ou 'rapports_texte' à ta fonction de mail
+    html_mail = generer_html_orange(liste_finale, j_str, texte_perso)
 
     elif mode == "Retard Global 🚨":
         impact_propre = "Retard Global" # Le texte exact de ton Power BI
@@ -153,10 +176,12 @@ with tab1:
         st.markdown("### 🛠️ Renseignement de l'incident (Pour suivi QS)")
         st.caption("Ces informations ne seront PAS envoyées dans le mail, elles servent uniquement au Dashboard Power BI Qualité de Service.")
         
-        colA, colB = st.columns(2)
         with colA:
-            app_origine = st.selectbox("APP (Origine) :", ["GCP", "ORCS", "POWERBI", "BATCH", "INFORMATICA", "Autre"])
-            statut_res = st.selectbox("Statut de l'incident :", ["🔴 En cours d'investigation", "🚧 Contournement mis en place", "✅ Résolu"])
+   
+            app_origine = st.text_input(
+                "Origine :", 
+                placeholder="Décrivez la cause (ex: Anomalie Lakehouse...)"
+            )
         with colB:
             source_incident = st.selectbox("Source :", ["Intra data", "Extra data"])
             action_cor = st.text_input("Action corrective :", "Refresh des tables GCP et relance des datasets...")
