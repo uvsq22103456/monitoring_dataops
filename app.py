@@ -121,33 +121,33 @@ with tab1:
             sujet_mail, html_mail = f"🟢 MYDATA : Données du {date_str} Disponibles", generer_html_tableau(date_str, statuts_tableau, "Données Disponibles")
 
     elif mode == "Partiel ⚠️":
-    impact_propre = "Données Incomplètes"
+        impact_propre = "Données Incomplètes"
     
-    # 1. On définit la liste de base
-    liste_base = ["SUIVI DES VENTES UNITAIRES", "FLASH MARQUES PROPRES", "SUIVI DES STOCKS", "SUIVI PERF CO"]
-    
-    # 2. Le multiselect (on ajoute une option pour saisir à la main)
-    # Note : Tu peux aussi utiliser st.multiselect tel quel et ajouter un text_input à côté
-    rapports_ko_ok = st.multiselect("Sélectionnez les rapports KO :", liste_base)
-    
-    # 3. L'astuce pour les rapports "en cours de route"
-    nouveaux_rapports = st.text_input("✍️ Un autre rapport KO ? (Séparez par une virgule si plusieurs)")
-    
-    # 4. On fusionne les deux listes pour le mail et le CSV
-    liste_finale = rapports_ko_ok
-    if nouveaux_rapports:
-        # On ajoute les noms tapés à la main à la liste
-        extra = [r.strip() for r in nouveaux_rapports.split(",")]
-        liste_finale = liste_finale + extra
-    
-    texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards, les données sont indisponibles pour :")
-    
-    # On transforme la liste en texte propre pour le mail et le CSV
-    rapports_texte = ", ".join(liste_finale)
-    
-    sujet_mail = f"🟠 MYDATA : Partiellement disponible ({j_str})"
-    # On passe 'liste_finale' ou 'rapports_texte' à ta fonction de mail
-    html_mail = generer_html_orange(liste_finale, j_str, texte_perso)
+        # 1. On définit la liste de base
+        liste_base = ["SUIVI DES VENTES UNITAIRES", "FLASH MARQUES PROPRES", "SUIVI DES STOCKS", "SUIVI PERF CO"]
+        
+        # 2. Le multiselect (on ajoute une option pour saisir à la main)
+        # Note : Tu peux aussi utiliser st.multiselect tel quel et ajouter un text_input à côté
+        rapports_ko_ok = st.multiselect("Sélectionnez les rapports KO :", liste_base)
+        
+        # 3. L'astuce pour les rapports "en cours de route"
+        nouveaux_rapports = st.text_input("✍️ Un autre rapport KO ? (Séparez par une virgule si plusieurs)")
+        
+        # 4. On fusionne les deux listes pour le mail et le CSV
+        liste_finale = rapports_ko_ok
+        if nouveaux_rapports:
+            # On ajoute les noms tapés à la main à la liste
+            extra = [r.strip() for r in nouveaux_rapports.split(",")]
+            liste_finale = liste_finale + extra
+        
+        texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards, les données sont indisponibles pour :")
+        
+        # On transforme la liste en texte propre pour le mail et le CSV
+        rapports_texte = ", ".join(liste_finale)
+        
+        sujet_mail = f"🟠 MYDATA : Partiellement disponible ({j_str})"
+        # On passe 'liste_finale' ou 'rapports_texte' à ta fonction de mail
+        html_mail = generer_html_orange(liste_finale, j_str, texte_perso)
 
     elif mode == "Retard Global 🚨":
         impact_propre = "Retard Global" # Le texte exact de ton Power BI
