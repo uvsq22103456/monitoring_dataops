@@ -21,6 +21,15 @@ DOMAINES = {
     "Détaxe": "<br><span style='font-weight: normal; font-size: 12px; color: #666;'>(bordereaux)</span>",
     "Productivité entrepôt": "<br><span style='font-weight: normal; font-size: 12px; color: #666;'>(Avex, heures)</span>"
 }
+LISTE_IMPACTS = [
+    "Données Incomplètes", 
+    "Retard Global", 
+    "Retard STOCK", 
+    "Retard Ventes", 
+    "Pas de données Stock",
+    "START Ko",
+    "➕ AUTRE (Saisie libre)"
+]
 
 # --- NOUVEAU : FONCTION DE SAUVEGARDE ENRICHIE ---
 def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", source="N/A", action_corrective="N/A", statut_resolution="N/A"):
@@ -178,6 +187,12 @@ with tab1:
 
         colA, colB = st.columns(2)
         with colA:
+            choix_impact = st.selectbox("Impact utilisateur :", LISTE_IMPACTS)
+        
+            if choix_impact == "➕ AUTRE (Saisie libre)":
+                impact_final = st.text_input("Précisez l'impact personnalisé :")
+            else:
+                impact_final = choix_impact
     
             app_origine = st.text_input(
                 "Origine :", 
