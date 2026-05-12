@@ -175,9 +175,10 @@ with tab1:
         st.markdown("---")
         st.markdown("### 🛠️ Renseignement de l'incident (Pour suivi QS)")
         st.caption("Ces informations ne seront PAS envoyées dans le mail, elles servent uniquement au Dashboard Power BI Qualité de Service.")
-        
+
+        colA, colB = st.columns(2)
         with colA:
-   
+    
             app_origine = st.text_input(
                 "Origine :", 
                 placeholder="Décrivez la cause (ex: Anomalie Lakehouse...)"
