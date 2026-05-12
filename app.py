@@ -31,6 +31,40 @@ LISTE_IMPACTS = [
     "➕ AUTRE (Saisie libre)"
 ]
 
+# Ta liste brute (j'ai ajouté le .sort() pour que ce soit rangé de A à Z)
+LISTE_RAPPORTS_BRUTE = [
+    "1001L - Mariage", "Activité par Tranche Horaire", "Baignoire", "Baignoire client par magasin", 
+    "BORNES-ALERTING", "C&C - Pilotage Stratégique", "CA Digital", "CA Horaire Digital", 
+    "CA Louis Vuitton", "Cockpit monétique e-commerce", "Commerce dates actualisation", "CRM", 
+    "Détection des Fraudes - Scénarios Remboursement", "Digital Dates d'actualisation", 
+    "FABRIC SURVEILLANCE CAPACITY (HUB)", "FABRIC USAGE METRICS", "Flash activité", 
+    "Flash marque propre", "Flash Réseau & Co", "Go For Good", "GROUPES AD - LICENCES", 
+    "GROUPES AD", "KPI Fid & Contactabilité - Suivi d'activité Parc Magasins", "Marque Propre", 
+    "Métriques d'utilisation PowerBI", "Montée en ligne", "My Data catalogue", "MyDataset Commerce", 
+    "MyDataset Digital", "MyDataset Finance", "MyDataset Flash", "MyDataset International", 
+    "MyDataset Supply", "Ouverture tiroir caisse", "Performance business hebdo", "Pilotage beauté", 
+    "Pilotage des contributions financières", "Pilotage Flux aller & retour E-commerce", 
+    "Pilotage managérial", "Pilotage marge", "Pilotage mensuel performance magasin - Clients", 
+    "PIT - Pilotage IT", "Présence des forces de vente", "PVE Pilotage Business", 
+    "Qualité de données - Hiérarchie Manager", "Reporting Check saisie coordonnée client à l'adhesion", 
+    "Retouches pour Magasin", "Retouches pour Reseau", "ROPO", "Ship From Store", "START", "START HSM", 
+    "Statistiques moyennes de remboursements", "STOCK_GL", "Suivi activité HSM", "Suivi CA tracé Marchandise", 
+    "Suivi complétude surface", "Suivi de l'activité d'enrichissement du PIM", 
+    "Suivi de la démarque connue et inconnue", "Suivi des Cartes Cadeaux Partenaires", 
+    "SUIVI DES COUTS MSTR", "Suivi des données CRM", "Suivi des partenaires BTB", 
+    "Suivi des performances marché et GL", "Suivi des rapprochements VAD", "Suivi des ventes unitaires", 
+    "Suivi détaxe", "SUIVI ECART SOURCING", "Suivi hors marchandises", "Bilan de collection", 
+    "Wellness", "Suivi mensuel programme fid", "Suivi performance commerciale", "Suivi Performance Stock", 
+    "Suivi Qualité de données", "SUIVI QUALITE DE SERVICE", "Typologie des caisses", "Dataset_BHV", 
+    "Pilotage mensuel Performance Magasins", "Suivi SFS RESEAU", "Suivi audience Power BI", 
+    "Gestion des coûts GCP"
+]
+
+# On trie pour que "1001L" soit en haut et "Wellness" à la fin
+LISTE_RAPPORTS_BRUTE.sort()
+
+# On ajoute l'option "Autre" à la fin pour la flexibilité
+LISTE_RAPPORTS = LISTE_RAPPORTS_BRUTE + ["➕ AUTRE (Saisie libre)"]
 # --- NOUVEAU : FONCTION DE SAUVEGARDE ENRICHIE ---
 def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", source="N/A", action_corrective="N/A", statut_resolution="N/A"):
     
@@ -131,13 +165,13 @@ with tab1:
 
     elif mode == "Partiel ⚠️":
         impact_propre = "Données Incomplètes"
-    
-        # 1. On définit la liste de base
-        liste_base = ["SUIVI DES VENTES UNITAIRES", "FLASH MARQUES PROPRES", "SUIVI DES STOCKS", "SUIVI PERF CO"]
         
-        # 2. Le multiselect (on ajoute une option pour saisir à la main)
-        # Note : Tu peux aussi utiliser st.multiselect tel quel et ajouter un text_input à côté
-        rapports_ko_ok = st.multiselect("Sélectionnez les rapports KO :", liste_base)
+        # 1. On trie et on utilise la GRANDE liste au lieu de l'ancienne petite liste
+        LISTE_RAPPORTS_BRUTE.sort()
+        
+        # 2. Le multiselect avec la barre de recherche native de Streamlit
+        st.write("💡 *Astuce : Cliquez et tapez les premières lettres du rapport pour le trouver.*")
+        rapports_ko_ok = st.multiselect("Sélectionnez les rapports KO :", LISTE_RAPPORTS_BRUTE)
         
         # 3. L'astuce pour les rapports "en cours de route"
         nouveaux_rapports = st.text_input("✍️ Un autre rapport KO ? (Séparez par une virgule si plusieurs)")
@@ -151,13 +185,13 @@ with tab1:
         
         texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards, les données sont indisponibles pour :")
         
-        # On transforme la liste en texte propre pour le mail et le CSV
+        # On transforme la liste en texte propre pour le mail et le CSV (C'est ça qui ira dans app_origine)
         rapports_texte = ", ".join(liste_finale)
         
         sujet_mail = f"🟠 MYDATA : Partiellement disponible ({j_str})"
-        # On passe 'liste_finale' ou 'rapports_texte' à ta fonction de mail
+        
+        # On passe la 'liste_finale' à ta fonction de mail
         html_mail = generer_html_orange(liste_finale, j_str, texte_perso)
-
     elif mode == "Retard Global 🚨":
         impact_propre = "Retard Global" # Le texte exact de ton Power BI
         texte_perso = st.text_input("Message d'alerte (modifiable) :", "⚠️ Suite à des retards dans les traitements, les données sont incomplètes.")
