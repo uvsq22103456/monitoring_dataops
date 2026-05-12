@@ -60,13 +60,13 @@ LISTE_RAPPORTS_BRUTE = [
     "Gestion des coûts GCP"
 ]
 
-# On trie pour que "1001L" soit en haut et "Wellness" à la fin
+
 LISTE_RAPPORTS_BRUTE.sort()
 
 # On ajoute l'option "Autre" à la fin pour la flexibilité
 LISTE_RAPPORTS = LISTE_RAPPORTS_BRUTE + ["➕ AUTRE (Saisie libre)"]
 # --- NOUVEAU : FONCTION DE SAUVEGARDE ENRICHIE ---
-def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", source="N/A", action_corrective="N/A", statut_resolution="N/A"):
+def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", source="N/A", action_corrective="N/A"):
     
     maintenant = datetime.now(ZoneInfo("Europe/Paris")).strftime("%d/%m/%Y %H:%M:%S")
     
@@ -77,8 +77,8 @@ def sauvegarder_historique(date_donnees, impact_utilisateur, app_origine="N/A", 
         "Impact utilisateur": impact_utilisateur,
         "APP (Origine)": app_origine,
         "Source": source,
-        "Action Corrective": action_corrective,
-        "Statut de l'incident": statut_resolution
+        "Action Corrective": action_corrective
+        
     }
     
     nouveau_statut = pd.DataFrame([nouvelle_ligne])
@@ -265,7 +265,7 @@ with tab1:
                 server.send_message(msg)
             
             # Sauvegarde standard pour un vrai retard
-            sauvegarder_historique(date_str, impact_propre, app_origine, source_incident, action_cor, statut_res)
+            sauvegarder_historique(date_str, impact_propre, app_origine, source_incident, action_cor)
             
             st.success(f"✅ Alerte envoyée avec succès !")
             st.balloons()
@@ -274,7 +274,7 @@ with tab1:
 
     if envoi_silencieux:
         # Sauvegarde spéciale "Fantôme"
-        sauvegarder_historique(date_str, "Sans impact", app_origine, source_incident, action_cor, "✅ Résolu")
+        sauvegarder_historique(date_str, "Sans impact", app_origine, source_incident, action_cor)
         st.success("🔕 Incident enregistré dans l'historique (Aucun mail envoyé) !")
         
 
