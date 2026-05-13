@@ -253,8 +253,8 @@ with tab1:
         try:
             msg = EmailMessage()
             msg['Subject'] = sujet_mail
-            msg['From'] = "mydata@galerieslafayette.com"
-            msg['Reply-To'] = "mydata@galerieslafayette.com"
+            msg['From'] = "My Data <mydata@galerieslafayette.com>"
+            msg['Reply-To'] = "My Data <mydata@galerieslafayette.com>"
             #msg['To'] = st.secrets["EMAIL_EXPEDITEUR"]
             msg['Bcc'] = st.secrets["DESTINATAIRE"]
             msg.add_alternative(html_mail, subtype='html')
